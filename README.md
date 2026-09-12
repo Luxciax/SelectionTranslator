@@ -1,30 +1,62 @@
 # SelectionTranslator
 
-SelectionTranslator 是一个面向 Windows 的低干扰划词 AI 工具。选中文本后，通过紧凑浮动菜单完成翻译、解释、润色和自定义 AI 动作，并保持当前工作流不断档。
+SelectionTranslator is a low-distraction AI selection tool for Windows. Select text anywhere, open a compact floating toolbar, and run translation, explanation, polishing, or custom AI actions without leaving your current workflow.
 
-## 主要能力
+## Features
 
-- Windows 全局划词与紧凑浮动工具栏
-- 动态 Action / Prompt / Route / Fallback
-- OpenAI Compatible、OpenAI Responses、Anthropic、Gemini 协议
-- 自定义 Provider、模型、Headers 与生成参数
-- 流式输出、Markdown / 纯文本结果
-- 应用级划词规则与剪贴板回退
-- Windows Credential Manager 保存 API Key
-- Tauri + Rust + React / TypeScript
+- System-wide text selection on Windows
+- Compact floating action toolbar
+- Translation, explanation, polishing, and custom AI actions
+- Dynamic Action / Prompt / Route / Fallback architecture
+- OpenAI-compatible Chat Completions
+- OpenAI Responses API
+- Anthropic Messages API
+- Google Gemini API
+- Custom providers, models, request headers, and generation options
+- Streaming responses with Markdown or plain-text output
+- Per-application selection rules and clipboard fallback
+- Windows Credential Manager integration for provider credentials
+- Tauri + Rust backend with React + TypeScript frontend
 
-## 安装
+## Downloads
 
-稳定版安装包、MSI 与 Portable 版本请从 GitHub Releases 获取。
+Stable Windows builds are available from GitHub Releases:
 
-## 开发
+https://github.com/Luxciax/SelectionTranslator/releases/latest
+
+The current release provides:
+
+- `SelectionTranslator_1.0.0_x64-setup.exe` — recommended Windows installer
+- `SelectionTranslator_1.0.0_x64_en-US.msi` — MSI package
+- `SelectionTranslator_1.0.0_x64_Portable.exe` — portable executable
+- `SHA256SUMS.txt` — SHA-256 checksums
+
+## Credential Handling
+
+No personal provider credentials are bundled with this repository.
+
+Credentials supplied through the application settings are stored at runtime using Windows Credential Manager. The source tree contains only public provider endpoints, protocol field names, and empty/default placeholders required by the application.
+
+Local environment files and build artifacts are excluded from Git through `.gitignore`.
+
+## Development
+
+Requirements:
+
+- Windows
+- Node.js
+- pnpm
+- Rust toolchain with the MSVC target
+- Tauri prerequisites
+
+Install dependencies and start the development build:
 
 ```bash
 pnpm install
 pnpm tauri dev
 ```
 
-常用检查：
+Common validation commands:
 
 ```bash
 pnpm check
@@ -33,16 +65,35 @@ cargo test --manifest-path src-tauri/Cargo.toml
 cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 ```
 
-## 版本规范
+Build Windows release packages:
 
-本项目从 `v1.0.0` 起采用 Semantic Versioning。详细规则见 [`docs/VERSIONING.md`](docs/VERSIONING.md)。
+```bash
+pnpm tauri build
+```
 
-## 来源与致谢
+## Versioning
 
-SelectionTranslator 的产品交互与早期探索曾参考 Cherry Studio 的划词翻译体验、模型兼容设计和相关实现思路。SelectionTranslator 不是 Cherry Studio 的 fork，也不隶属于 Cherry Studio / CherryHQ。
+SelectionTranslator follows Semantic Versioning starting with the first public stable release, `v1.0.0`.
 
-由于开发过程中存在对 Cherry Studio AGPL-3.0 代码与实现的研究和参考，本项目选择以 GNU Affero General Public License v3.0 发布，以保持许可证兼容并避免来源边界不清带来的合规风险。详见 [`NOTICE`](NOTICE)。
+- **MAJOR** — incompatible configuration, behavior, or public-contract changes
+- **MINOR** — backward-compatible features and new capabilities
+- **PATCH** — backward-compatible fixes, compatibility updates, and small UX improvements
+
+See [`docs/VERSIONING.md`](docs/VERSIONING.md) for the complete release policy.
+
+## Attribution
+
+SelectionTranslator is an independent project. Its product design and early implementation research were informed by Cherry Studio, including its selection-translation interaction patterns and model-provider compatibility concepts.
+
+Cherry Studio is developed by CherryHQ and its contributors and is distributed under the GNU Affero General Public License v3.0.
+
+Official Cherry Studio repository:
+https://github.com/CherryHQ/cherry-studio
+
+SelectionTranslator is not affiliated with, endorsed by, or an official fork of Cherry Studio or CherryHQ. See [`NOTICE`](NOTICE) for the full attribution statement.
 
 ## License
 
-GNU Affero General Public License v3.0 (`AGPL-3.0-only`). See [`LICENSE`](LICENSE).
+SelectionTranslator is distributed under the **GNU Affero General Public License v3.0 (`AGPL-3.0-only`)**.
+
+See [`LICENSE`](LICENSE) for the full license text.
