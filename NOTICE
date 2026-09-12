@@ -1,0 +1,15 @@
+SelectionTranslator
+Copyright (C) 2026 SelectionTranslator contributors
+
+This project is distributed under the GNU Affero General Public License v3.0.
+
+Attribution
+-----------
+SelectionTranslator's product design and early implementation research were informed by Cherry Studio, including its selection-translation interaction patterns and model-provider compatibility concepts.
+
+Cherry Studio is developed by CherryHQ and its contributors and is distributed under the GNU Affero General Public License v3.0.
+Official project: https://github.com/CherryHQ/cherry-studio
+
+SelectionTranslator is an independent project and is not affiliated with, endorsed by, or an official fork of Cherry Studio or CherryHQ.
+
+Where copyrightable Cherry Studio code or adapted portions are present, the original copyright and AGPL-3.0 obligations remain applicable. This notice does not replace the full license terms in LICENSE.

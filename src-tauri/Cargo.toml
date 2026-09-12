@@ -1,8 +1,10 @@
 [package]
 name = "selection-translator"
-version = "0.2.4"
+version = "1.0.0"
 description = "Low-disturbance selection translation tool"
 authors = ["SelectionTranslator contributors"]
+license = "AGPL-3.0-only"
+repository = "https://github.com/Luxciax/SelectionTranslator"
 edition = "2021"
 
 [lib]

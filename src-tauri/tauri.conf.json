@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "SelectionTranslator",
-  "version": "0.2.4",
+  "version": "1.0.0",
   "identifier": "com.selectiontranslator.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
