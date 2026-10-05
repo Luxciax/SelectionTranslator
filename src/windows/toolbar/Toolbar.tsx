@@ -20,7 +20,8 @@ function toolbarWidth(actions: ToolbarAction[]): number {
     return total + Math.max(42, labelWidth + 20) + 2
   }, 0)
   const groupDivider = actions.some((action, index) => index > 0 && actions[index - 1]?.primary && !action.primary) ? 5 : 0
-  const tail = actions.length > 0 ? 5 + 31 : 31
+  const copyWidth = Math.max(42, Math.ceil(context.measureText('复制').width) + 20) + 2
+  const tail = copyWidth + 31 + (actions.length > 0 ? 5 : 0)
   return Math.min(960, Math.max(180, 12 + actionWidth + groupDivider + tail))
 }
 
@@ -80,6 +81,16 @@ export function Toolbar() {
     }
   }
 
+  const copySelection = async () => {
+    if (!selection?.text) return
+    try {
+      await invoke('write_to_clipboard', { text: selection.text })
+      await getCurrentWindow().hide()
+    } catch (error) {
+      console.error('Failed to copy selection', error)
+    }
+  }
+
   return (
     <div className="toolbar" onContextMenu={(event) => event.preventDefault()}>
       {actions.map((action, index) => {
@@ -99,6 +110,9 @@ export function Toolbar() {
         )
       })}
       {actions.length > 0 && <span className="divider" />}
+      <button type="button" aria-label="复制" title="复制" onClick={() => void copySelection()}>
+        复制
+      </button>
       <button className="icon-button" type="button" aria-label="关闭" title="关闭" onClick={hide}>
         <X size={16} strokeWidth={1.8} />
       </button>
