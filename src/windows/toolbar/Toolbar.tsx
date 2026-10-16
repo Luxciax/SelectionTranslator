@@ -3,10 +3,11 @@ import { LogicalSize } from '@tauri-apps/api/dpi'
 import { listen } from '@tauri-apps/api/event'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { AppConfig } from '../../domain/settings'
 import {
   fallbackToolbarItems,
+  selectionUrl,
   visibleToolbarItems,
   type ToolbarMenuItem
 } from '../../services/toolbar-service'
@@ -30,7 +31,12 @@ function toolbarWidth(items: ToolbarMenuItem[]): number {
 
 export function Toolbar() {
   const [selection, setSelection] = useState<SelectionPayload | null>(null)
-  const [items, setItems] = useState<ToolbarMenuItem[]>(() => fallbackToolbarItems())
+  const [config, setConfig] = useState<AppConfig | null>(null)
+  const selectionText = selection?.text || ''
+  const items = useMemo(
+    () => config ? visibleToolbarItems(config, selectionText) : fallbackToolbarItems(selectionText),
+    [config, selectionText]
+  )
 
   useEffect(() => {
     void getCurrentWindow().setSize(new LogicalSize(toolbarWidth(items), 43)).catch((error) => {
@@ -43,8 +49,8 @@ export function Toolbar() {
     const cleanup: Array<() => void> = []
 
     void getAppConfig()
-      .then((config) => {
-        if (!disposed) setItems(visibleToolbarItems(config))
+      .then((next) => {
+        if (!disposed) setConfig(next)
       })
       .catch(() => undefined)
 
@@ -53,7 +59,7 @@ export function Toolbar() {
         if (!disposed) setSelection(event.payload)
       }),
       listen<AppConfig>('settings://changed', (event) => {
-        if (!disposed) setItems(visibleToolbarItems(event.payload))
+        if (!disposed) setConfig(event.payload)
       })
     ]).then((unlisteners) => {
       if (disposed) unlisteners.forEach((unlisten) => unlisten())
@@ -84,13 +90,38 @@ export function Toolbar() {
     }
   }
 
-  const copySelection = async () => {
+  const openExternal = async (url: string) => {
+    await invoke('open_external_url', { url })
+    await getCurrentWindow().hide()
+  }
+
+  const runUtility = async (item: Extract<ToolbarMenuItem, { kind: 'utility' }>) => {
     if (!selection?.text) return
+    const text = selection.text.trim()
     try {
-      await invoke('write_to_clipboard', { text: selection.text })
-      await getCurrentWindow().hide()
+      switch (item.utility) {
+        case 'copy':
+          await invoke('write_to_clipboard', { text: selection.text })
+          await getCurrentWindow().hide()
+          return
+        case 'search':
+          await openExternal(`https://www.bing.com/search?q=${encodeURIComponent(text)}`)
+          return
+        case 'dictionary':
+          await openExternal(`https://www.bing.com/dict/search?q=${encodeURIComponent(text)}`)
+          return
+        case 'speak':
+          await invoke('speak_text', { text: selection.text })
+          await getCurrentWindow().hide()
+          return
+        case 'open-link': {
+          const url = selectionUrl(text)
+          if (url) await openExternal(url)
+          return
+        }
+      }
     } catch (error) {
-      console.error('Failed to copy selection', error)
+      console.error(`Failed to run toolbar utility ${item.utility}`, error)
     }
   }
 
@@ -106,8 +137,8 @@ export function Toolbar() {
               className={item.primary ? 'primary' : undefined}
               type="button"
               aria-label={item.label}
-              title={item.kind === 'copy' ? '复制' : undefined}
-              onClick={() => item.kind === 'copy' ? void copySelection() : void runAction(item)}>
+              title={item.label}
+              onClick={() => item.kind === 'utility' ? void runUtility(item) : void runAction(item)}>
               {item.label}
             </button>
           </span>

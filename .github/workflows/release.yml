@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        shell: pwsh
+        run: |
+          pnpm check
+          cargo check --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: Build and publish Tauri release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: SelectionTranslator v__VERSION__
+          releaseBody: |
+            Windows release for SelectionTranslator v__VERSION__.
+
+            Highlights:
+            - Configurable selection toolbar
+            - Search, dictionary, text-to-speech and link opening
+            - Context-aware buttons for URLs, code, terms and long text
+          generateReleaseNotes: true
+          releaseDraft: false
+          prerelease: false

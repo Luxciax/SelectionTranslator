@@ -72,6 +72,8 @@ export interface UiPreferences {
   activeProviderId?: string
   toolbarOrder: string[]
   toolbarCopyEnabled: boolean
+  toolbarHiddenUtilities: string[]
+  toolbarContextAware: boolean
 }
 
 export interface AppConfig {

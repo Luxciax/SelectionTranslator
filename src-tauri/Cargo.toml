@@ -1,6 +1,6 @@
 [package]
 name = "selection-translator"
-version = "1.0.0"
+version = "1.1.0"
 description = "Low-disturbance selection translation tool"
 authors = ["SelectionTranslator contributors"]
 license = "AGPL-3.0-only"

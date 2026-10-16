@@ -20,6 +20,7 @@ pub fn run() {
             Some(vec!["--autostart"]),
         ))
         .manage(ai::AiRuntime::new())
+        .manage(platform::system_actions::SpeechRuntime::new())
         .manage(diagnostic_log)
         .manage(settings_state)
         .invoke_handler(tauri::generate_handler![
@@ -46,6 +47,8 @@ pub fn run() {
             selection::runtime_selection_paused,
             platform::autostart::autostart_is_enabled,
             platform::autostart::autostart_set_enabled,
+            platform::system_actions::open_external_url,
+            platform::system_actions::speak_text,
         ])
         .setup(|app| {
             selection::start(app.handle().clone())?;

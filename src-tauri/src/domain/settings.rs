@@ -15,6 +15,10 @@ pub struct UiPreferences {
     pub toolbar_order: Vec<String>,
     #[serde(default = "default_true")]
     pub toolbar_copy_enabled: bool,
+    #[serde(default)]
+    pub toolbar_hidden_utilities: Vec<String>,
+    #[serde(default = "default_true")]
+    pub toolbar_context_aware: bool,
 }
 
 impl Default for UiPreferences {
@@ -25,6 +29,8 @@ impl Default for UiPreferences {
             active_provider_id: None,
             toolbar_order: Vec::new(),
             toolbar_copy_enabled: true,
+            toolbar_hidden_utilities: Vec::new(),
+            toolbar_context_aware: true,
         }
     }
 }

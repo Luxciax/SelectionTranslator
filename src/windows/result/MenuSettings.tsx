@@ -1,11 +1,25 @@
-import { ArrowDown, ArrowUp, Copy, RotateCcw, Sparkles, X } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  BookOpen,
+  BrainCircuit,
+  Copy,
+  ExternalLink,
+  RotateCcw,
+  Search,
+  Sparkles,
+  Volume2,
+  X
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { AppConfig } from '../../domain/settings'
 import {
   moveToolbarItem,
   resetToolbarMenu,
+  setToolbarContextAware,
   setToolbarItemVisible,
-  toolbarMenuItems
+  toolbarMenuItems,
+  type ToolbarUtilityId
 } from '../../services/toolbar-service'
 
 interface MenuSettingsProps {
@@ -13,12 +27,33 @@ interface MenuSettingsProps {
   onConfigChange: (config: AppConfig) => void
 }
 
+const utilityIcons = {
+  copy: Copy,
+  search: Search,
+  dictionary: BookOpen,
+  speak: Volume2,
+  'open-link': ExternalLink
+} satisfies Record<ToolbarUtilityId, typeof Copy>
+
 export function MenuSettings({ config, onConfigChange }: MenuSettingsProps) {
   const items = useMemo(() => toolbarMenuItems(config), [config])
   const visibleItems = items.filter((item) => item.visible && item.available)
   const [savingItem, setSavingItem] = useState<string | null>(null)
   const [resetting, setResetting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const smartEnabled = config.ui.toolbarContextAware !== false
+
+  const toggleSmart = async () => {
+    setSavingItem('__smart__')
+    setError(null)
+    try {
+      onConfigChange(await setToolbarContextAware(config, !smartEnabled))
+    } catch (toggleError) {
+      setError(String(toggleError))
+    } finally {
+      setSavingItem(null)
+    }
+  }
 
   const toggleItem = async (itemId: string, visible: boolean) => {
     setSavingItem(itemId)
@@ -61,7 +96,7 @@ export function MenuSettings({ config, onConfigChange }: MenuSettingsProps) {
       <section className="menu-preview-card">
         <div className="menu-preview-copy">
           <strong>菜单预览</strong>
-          <span>显示、隐藏和排序会立即同步到划词工具条</span>
+          <span>{smartEnabled ? '这里显示完整配置；实际菜单会按选中文本智能裁剪' : '当前按固定按钮配置显示'}</span>
         </div>
         <div className="menu-preview-toolbar">
           {visibleItems.length > 0 ? (
@@ -76,10 +111,23 @@ export function MenuSettings({ config, onConfigChange }: MenuSettingsProps) {
         </div>
       </section>
 
+      <button
+        type="button"
+        className="menu-smart-row"
+        disabled={savingItem !== null || resetting}
+        onClick={() => void toggleSmart()}>
+        <span className="menu-item-icon"><BrainCircuit size={15} strokeWidth={1.8} /></span>
+        <span className="menu-item-copy">
+          <strong>上下文智能显示</strong>
+          <small>链接、代码、单词、长文本和普通句子自动显示更合适的按钮</small>
+        </span>
+        <span className={`compact-switch${smartEnabled ? ' on' : ''}`} aria-hidden="true"><i /></span>
+      </button>
+
       <div className="menu-settings-head">
         <div>
           <strong>按钮与顺序</strong>
-          <span>关闭按钮固定保留；停用的 AI 动作不会显示在实际菜单中。</span>
+          <span>关闭按钮固定保留；系统按钮不消耗 AI Token。</span>
         </div>
         <button type="button" disabled={resetting || savingItem !== null} onClick={() => void resetMenu()}>
           <RotateCcw size={13} strokeWidth={1.8} />
@@ -90,9 +138,9 @@ export function MenuSettings({ config, onConfigChange }: MenuSettingsProps) {
       <div className="menu-item-list">
         {items.map((item, index) => {
           const busy = savingItem === item.id
-          const ItemIcon = item.kind === 'copy' ? Copy : Sparkles
-          const secondary = item.kind === 'copy'
-            ? '系统按钮'
+          const ItemIcon = item.kind === 'utility' ? utilityIcons[item.utility] : Sparkles
+          const secondary = item.kind === 'utility'
+            ? `系统按钮 · ${item.contextHint}`
             : item.available
               ? 'AI 动作'
               : 'AI 动作 · 已停用'
@@ -139,7 +187,7 @@ export function MenuSettings({ config, onConfigChange }: MenuSettingsProps) {
       </div>
 
       <div className="menu-settings-note">
-        要添加新的 AI 按钮，请在“动作与路由”里新建自定义动作；创建后会自动出现在这里，可再决定是否显示和放在什么位置。
+        URL 会出现“打开”；代码优先“解释代码”；单词/短语显示词典和朗读；长文本突出总结。要添加新的 AI 按钮，仍在“动作与路由”里新建自定义动作。
       </div>
       {error && <div className="settings-error">{error}</div>}
     </div>
