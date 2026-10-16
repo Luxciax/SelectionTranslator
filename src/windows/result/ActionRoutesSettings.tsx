@@ -1,6 +1,4 @@
 import {
-  ArrowDown,
-  ArrowUp,
   Pencil,
   Plus,
   RotateCcw,
@@ -13,7 +11,6 @@ import type { ActionDefinition, AppConfig, GenerationOptions, ModelRef } from '.
 import {
   createCustomAction,
   deleteCustomAction,
-  moveAction,
   setActionEnabled,
   updateActionDefinition
 } from '../../services/action-service'
@@ -36,7 +33,6 @@ interface DefinitionDraft {
   prompt: string
   targetLanguage: string
   alternateLanguage: string
-  showInToolbar: boolean
   outputMode: ActionDefinition['outputMode']
 }
 
@@ -87,7 +83,6 @@ export function ActionRoutesSettings({ config, onConfigChange }: ActionRoutesSet
         prompt: action.prompt || '',
         targetLanguage: action.targetLanguage || '',
         alternateLanguage: action.alternateLanguage || '',
-        showInToolbar: action.showInToolbar,
         outputMode: action.outputMode
       }
     }
@@ -163,7 +158,6 @@ export function ActionRoutesSettings({ config, onConfigChange }: ActionRoutesSet
         prompt: draft.prompt,
         targetLanguage: draft.targetLanguage,
         alternateLanguage: draft.alternateLanguage,
-        showInToolbar: draft.showInToolbar,
         outputMode: draft.outputMode
       })
       onConfigChange(next)
@@ -189,18 +183,6 @@ export function ActionRoutesSettings({ config, onConfigChange }: ActionRoutesSet
       })
     } catch (deleteError) {
       setError(String(deleteError))
-    } finally {
-      setSavingAction(null)
-    }
-  }
-
-  const reorderAction = async (actionId: string, direction: -1 | 1) => {
-    setSavingAction(actionId)
-    setError(null)
-    try {
-      onConfigChange(await moveAction(config, actionId, direction))
-    } catch (moveError) {
-      setError(String(moveError))
     } finally {
       setSavingAction(null)
     }
@@ -322,21 +304,20 @@ export function ActionRoutesSettings({ config, onConfigChange }: ActionRoutesSet
   return (
     <div className="action-routes-editor">
       <div className="action-routes-head">
-        <span>动作按顺序显示在划词工具条；可单独指定模型、备用模型、Prompt 和生成参数</span>
+        <span>在这里管理 Prompt、模型路由与生成参数；划词工具条的显示和顺序请到“菜单按钮”设置。</span>
         <button type="button" aria-label="添加自定义动作" title="添加自定义动作" disabled={savingAction === '__new__'} onClick={() => void createAction()}>
           <Plus size={13} strokeWidth={1.8} />
         </button>
       </div>
 
       <div className="action-route-list">
-        {actions.map((action, actionIndex) => {
+        {actions.map((action) => {
           const draft = drafts[action.id] || { providerId: FOLLOW_ACTIVE, model: '', fallbacks: [], options: {} }
           const definition = definitionDrafts[action.id] || {
             name: action.name,
             prompt: action.prompt || '',
             targetLanguage: action.targetLanguage || '',
             alternateLanguage: action.alternateLanguage || '',
-            showInToolbar: action.showInToolbar,
             outputMode: action.outputMode
           }
           const followsActive = draft.providerId === FOLLOW_ACTIVE
@@ -427,10 +408,6 @@ export function ActionRoutesSettings({ config, onConfigChange }: ActionRoutesSet
                         <option value="plain-text">纯文本</option>
                       </select>
                     </label>
-                    <label className="action-toolbar-toggle">
-                      <input type="checkbox" checked={definition.showInToolbar} onChange={(event) => updateDefinitionDraft(action.id, { showInToolbar: event.target.checked })} />
-                      <span>显示在划词工具条</span>
-                    </label>
                   </div>
                   <div className="action-language-grid">
                     <label>
@@ -464,11 +441,9 @@ export function ActionRoutesSettings({ config, onConfigChange }: ActionRoutesSet
                     可用 {'{target_language}'}、{'{alternate_language}'}、{'{action_name}'}。选中文本始终作为独立不可信输入，不会插入 Prompt 模板。
                   </div>
                   <div className="action-definition-footer">
-                    <div>
-                      <button type="button" aria-label="上移" title="上移" disabled={actionIndex === 0 || savingAction === action.id} onClick={() => void reorderAction(action.id, -1)}><ArrowUp size={12} strokeWidth={1.8} /></button>
-                      <button type="button" aria-label="下移" title="下移" disabled={actionIndex === actions.length - 1 || savingAction === action.id} onClick={() => void reorderAction(action.id, 1)}><ArrowDown size={12} strokeWidth={1.8} /></button>
-                      {!action.builtin && <button className="danger" type="button" aria-label="删除动作" title="删除动作" disabled={savingAction === action.id} onClick={() => void deleteAction(action)}><Trash2 size={12} strokeWidth={1.8} /></button>}
-                    </div>
+                    {!action.builtin ? (
+                      <button className="danger" type="button" aria-label="删除动作" title="删除动作" disabled={savingAction === action.id} onClick={() => void deleteAction(action)}><Trash2 size={12} strokeWidth={1.8} /></button>
+                    ) : <span />}
                     <button className="action-definition-save" type="button" disabled={savingAction === action.id} onClick={() => void saveDefinition(action.id)}><Save size={12} strokeWidth={1.8} /><span>保存动作</span></button>
                   </div>
                 </div>

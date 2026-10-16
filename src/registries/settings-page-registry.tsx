@@ -1,11 +1,12 @@
 import type { ComponentType } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { AppWindow, MousePointer2, Route, ServerCog, Settings2 } from 'lucide-react'
+import { AppWindow, ListChecks, MousePointer2, Route, ServerCog, Settings2 } from 'lucide-react'
 import type { AppConfig } from '../domain/settings'
 import type { AiSettings } from '../types'
 import { ActionRoutesSettings } from '../windows/result/ActionRoutesSettings'
 import { AppRulesSettings } from '../windows/result/AppRulesSettings'
 import { GeneralSettings } from '../windows/result/GeneralSettings'
+import { MenuSettings } from '../windows/result/MenuSettings'
 import { ProviderProfilesSettings } from '../windows/result/ProviderProfilesSettings'
 import { TriggerSettings } from '../windows/result/TriggerSettings'
 
@@ -52,6 +53,10 @@ function ActionsPage({ config, onConfigChange }: SettingsPageProps) {
   return <ActionRoutesSettings config={config} onConfigChange={onConfigChange} />
 }
 
+function MenuPage({ config, onConfigChange }: SettingsPageProps) {
+  return <MenuSettings config={config} onConfigChange={onConfigChange} />
+}
+
 function SelectionPage({ config, onConfigChange }: SettingsPageProps) {
   return <TriggerSettings config={config} onConfigChange={onConfigChange} />
 }
@@ -81,6 +86,14 @@ settingsPageRegistry.register({
   icon: Route,
   order: 20,
   component: ActionsPage
+})
+settingsPageRegistry.register({
+  id: 'menu',
+  title: '菜单按钮',
+  description: '显示、隐藏与调整划词工具条顺序',
+  icon: ListChecks,
+  order: 25,
+  component: MenuPage
 })
 settingsPageRegistry.register({
   id: 'selection',

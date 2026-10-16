@@ -70,6 +70,8 @@ export interface UiPreferences {
   targetLanguage: string
   alternateLanguage: string
   activeProviderId?: string
+  toolbarOrder: string[]
+  toolbarCopyEnabled: boolean
 }
 
 export interface AppConfig {
