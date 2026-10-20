@@ -295,13 +295,20 @@ fn try_copy(keys: &str, polls: usize, settle_ms: u64) -> Option<String> {
 
     for _ in 0..polls {
         sleep(Duration::from_millis(POLL_INTERVAL_MS));
-        if unsafe { GetClipboardSequenceNumber() } != before {
-            if settle_ms > 0 {
-                sleep(Duration::from_millis(settle_ms));
+        if unsafe { GetClipboardSequenceNumber() } == before {
+            continue;
+        }
+
+        if settle_ms > 0 {
+            sleep(Duration::from_millis(settle_ms));
+        }
+        for _ in 0..8 {
+            if let Some(text) = read_unicode_text() {
+                return Some(text);
             }
             sleep(Duration::from_millis(10));
-            return read_unicode_text();
         }
+        return None;
     }
     None
 }

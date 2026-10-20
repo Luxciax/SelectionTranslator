@@ -48,10 +48,10 @@ jobs:
           releaseBody: |
             Windows release for SelectionTranslator v__VERSION__.
 
-            Highlights:
-            - Configurable selection toolbar
-            - Search, dictionary, text-to-speech and link opening
-            - Context-aware buttons for URLs, code, terms and long text
+            Fixes:
+            - Remove the black outer frame around the result window
+            - Improve clipboard fallback reliability when copied text becomes available slightly later
+            - Preserve the existing low-disturbance selection trigger behavior
           generateReleaseNotes: true
           releaseDraft: false
           prerelease: false
