@@ -27,6 +27,7 @@ use crate::domain::app_rule::ClipboardFallbackPolicy;
 use super::types::SelectionCandidate;
 
 const POLL_INTERVAL_MS: u64 = 5;
+const CLIPBOARD_OPEN_POLLS: usize = 30;
 const CTRL_INSERT_POLLS: usize = 20;
 const CTRL_C_POLLS: usize = 36;
 
@@ -369,11 +370,11 @@ struct ClipboardOpenGuard;
 
 impl ClipboardOpenGuard {
     fn open() -> Option<Self> {
-        for _ in 0..10 {
+        for _ in 0..CLIPBOARD_OPEN_POLLS {
             if unsafe { OpenClipboard(None) }.is_ok() {
                 return Some(Self);
             }
-            sleep(Duration::from_millis(5));
+            sleep(Duration::from_millis(POLL_INTERVAL_MS));
         }
         None
     }

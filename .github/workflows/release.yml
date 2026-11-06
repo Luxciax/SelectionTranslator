@@ -49,9 +49,9 @@ jobs:
             Windows release for SelectionTranslator v__VERSION__.
 
             Fixes:
-            - Remove the black outer frame around the result window
-            - Improve clipboard fallback reliability when copied text becomes available slightly later
-            - Preserve the existing low-disturbance selection trigger behavior
+            - Automatically recover the global mouse hook when Windows stops delivering callbacks
+            - Improve clipboard fallback tolerance when other clipboard tools briefly hold the clipboard
+            - Add hook lifecycle and recovery diagnostics for easier troubleshooting
           generateReleaseNotes: true
           releaseDraft: false
           prerelease: false

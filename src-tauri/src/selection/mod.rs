@@ -158,15 +158,27 @@ pub fn runtime_selection_paused(app: AppHandle) -> bool {
 pub fn start(app: AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     let (input_tx, input_rx) = sync_channel::<InputEvent>(128);
     let (candidate_tx, candidate_rx) = channel::<QueuedCandidate>();
+    let (hook_status_tx, hook_status_rx) = channel::<hook::HookStatus>();
     let runtime = SelectionRuntime::new();
     let latest_generation = runtime.generation.clone();
     let event_paused = runtime.paused.clone();
     let resolver_paused = runtime.paused.clone();
     app.manage(runtime);
-    let hook = hook::start(input_tx).map_err(std::io::Error::other)?;
+    let hook = hook::start(input_tx, hook_status_tx).map_err(std::io::Error::other)?;
     app.manage(HookState {
         _hook: Mutex::new(Some(hook)),
     });
+
+    let hook_log_app = app.clone();
+    std::thread::Builder::new()
+        .name("selection-hook-log".into())
+        .spawn(move || {
+            while let Ok(status) = hook_status_rx.recv() {
+                hook_log_app
+                    .state::<crate::diagnostics::DiagnosticLog>()
+                    .record(status.event, &status.detail);
+            }
+        })?;
 
     let event_app = app.clone();
     let event_generation = latest_generation.clone();
